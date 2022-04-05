@@ -12,14 +12,15 @@ var Snowflake = /** @class */ (function () {
      */
     /* c8 ignore end */
     Snowflake.generate = function (_a) {
-        var _b = _a === void 0 ? {} : _a, _c = _b.timestamp, timestamp = _c === void 0 ? Date.now() : _c, _d = _b.shard_id, shard_id = _d === void 0 ? Snowflake.SHARD_ID : _d;
+        var _b = _a === void 0 ? {} : _a, _c = _b.timestamp, timestamp = _c === void 0 ? Date.now() : _c, _d = _b.shard_id, shard_id = _d === void 0 ? Snowflake.SHARD_ID : _d, _e = _b.salt, salt = _e === void 0 ? Number((Math.random() * 1e3).toFixed(0)) : _e;
         if (timestamp instanceof Date)
             timestamp = timestamp.valueOf();
         else
             timestamp = new Date(timestamp).valueOf();
         // tslint:disable:no-bitwise
-        var result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
+        var result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(23);
         result = result | (BigInt(shard_id) << BigInt(10));
+        result = result | BigInt(salt % 1024);
         // tslint:enable:no-bitwise
         return result.toString();
     };
@@ -31,9 +32,10 @@ var Snowflake = /** @class */ (function () {
     Snowflake.parse = function (snowflake) {
         var binary = Snowflake.binary(snowflake);
         return {
-            timestamp: Number(Snowflake.extractBits(snowflake, BigInt(22), BigInt(64)) +
+            timestamp: Number(Snowflake.extractBits(snowflake, BigInt(23), BigInt(64)) +
                 BigInt(Snowflake.EPOCH)),
             shard_id: Number(Snowflake.extractBits(snowflake, BigInt(10), BigInt(13))),
+            salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
             binary: binary,
         };
     };

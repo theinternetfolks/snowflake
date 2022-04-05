@@ -20,10 +20,10 @@ export declare class Snowflake {
      * @param {Date|number} [timestamp = Date.now] - Timestamp to generate from
      * @returns {bigint}
      */
-    static generate({ timestamp, shard_id, }?: {
+    static generate({ timestamp, shard_id, salt, }?: {
         timestamp?: Date | number;
         shard_id?: number;
-        epoch?: number;
+        salt?: number;
     }): string;
     /**
      * Deconstruct a snowflake to its values using the `Generator.epoch`.
@@ -67,6 +67,7 @@ declare type SnowflakeResolvable = string | number | bigint;
 interface DeconstructedSnowflake {
     timestamp: number;
     shard_id: number;
+    salt: number;
     binary: string;
 }
 export {};
