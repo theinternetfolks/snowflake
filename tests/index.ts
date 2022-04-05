@@ -6,19 +6,34 @@ describe("index", () => {
     it("should generate a snowflake", () => {
       const tests = [
         {
-          timestamp: 1649156222074,
-          value: "6917062538869867520",
-          shard_id: 1,
-        },
-        {
-          timestamp: 1649156718566,
-          value: "6917064621308249088",
-          shard_id: 1,
-        },
-        {
-          timestamp: 1649157035498,
-          value: "6917065950617407488",
+          timestamp: 1649161028424,
+          value: "13834165396325798911",
           shard_id: 4,
+          salt: 1023,
+        },
+        {
+          timestamp: 1649161059081,
+          value: "13834165653496123123",
+          shard_id: 755,
+          salt: 755,
+        },
+        {
+          timestamp: 1649161081508,
+          value: "13834165841628458404",
+          shard_id: 1755,
+          salt: 420,
+        },
+        {
+          timestamp: 1649161118392,
+          value: "13834166151032079361",
+          shard_id: 1,
+          salt: 1,
+        },
+        {
+          timestamp: 1649161266905,
+          value: "13834167396849431313",
+          shard_id: 12,
+          salt: 785,
         },
       ];
       for (const test of tests) {
@@ -26,9 +41,17 @@ describe("index", () => {
           Snowflake.generate({
             timestamp: test.timestamp,
             shard_id: test.shard_id,
+            salt: test.salt,
           }).toString()
         ).to.be.eq(test.value);
       }
+    });
+    it("should generate a random snowflake", () => {
+      const generated: string[] = [];
+      for (const test of [...Array(5)]) {
+        generated.push(Snowflake.generate());
+      }
+      expect(generated.length).to.be.equal(new Set(generated).size);
     });
   });
 
@@ -36,19 +59,34 @@ describe("index", () => {
     it("should desconstruct a snowflake", () => {
       const tests = [
         {
-          timestamp: 1649156222074,
-          value: "6917062538869867520",
-          shard_id: 1,
-        },
-        {
-          timestamp: 1649156718566,
-          value: "6917064621308249088",
-          shard_id: 1,
-        },
-        {
-          timestamp: 1649157035498,
-          value: "6917065950617407488",
+          timestamp: 1649161028424,
+          value: "13834165396325798911",
           shard_id: 4,
+          salt: 1023,
+        },
+        {
+          timestamp: 1649161059081,
+          value: "13834165653496123123",
+          shard_id: 755,
+          salt: 755,
+        },
+        {
+          timestamp: 1649161081508,
+          value: "13834165841628458404",
+          shard_id: 1755,
+          salt: 420,
+        },
+        {
+          timestamp: 1649161118392,
+          value: "13834166151032079361",
+          shard_id: 1,
+          salt: 1,
+        },
+        {
+          timestamp: 1649161266905,
+          value: "13834167396849431313",
+          shard_id: 12,
+          salt: 785,
         },
       ];
       for (const test of tests) {

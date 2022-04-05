@@ -34,16 +34,18 @@ export class Snowflake {
   static generate({
     timestamp = Date.now(),
     shard_id = Snowflake.SHARD_ID,
+    salt = Number((Math.random() * 1e3).toFixed(0)),
   }: {
     timestamp?: Date | number;
     shard_id?: number;
-    epoch?: number;
+    salt?: number;
   } = {}): string {
     if (timestamp instanceof Date) timestamp = timestamp.valueOf();
     else timestamp = new Date(timestamp).valueOf();
     // tslint:disable:no-bitwise
-    let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
+    let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(23);
     result = result | (BigInt(shard_id) << BigInt(10));
+    result = result | BigInt(salt % 1024);
     // tslint:enable:no-bitwise
     return result.toString();
   }
@@ -58,12 +60,13 @@ export class Snowflake {
     const binary = Snowflake.binary(snowflake);
     return {
       timestamp: Number(
-        Snowflake.extractBits(snowflake, BigInt(22), BigInt(64)) +
+        Snowflake.extractBits(snowflake, BigInt(23), BigInt(64)) +
           BigInt(Snowflake.EPOCH)
       ),
       shard_id: Number(
         Snowflake.extractBits(snowflake, BigInt(10), BigInt(13))
       ),
+      salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
       binary,
     };
   }
@@ -128,5 +131,6 @@ type SnowflakeResolvable = string | number | bigint;
 interface DeconstructedSnowflake {
   timestamp: number;
   shard_id: number;
+  salt: number;
   binary: string;
 }
