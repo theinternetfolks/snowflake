@@ -4,7 +4,8 @@
   "description": "Library to help you create a Snowflake Id or parse the same.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "yarn compile && yarn build:map",
+    "compile": "tsc",
     "build:map": "tsc -d --declarationDir ./dist --declarationMap --emitDeclarationOnly",
     "test": "mocha --ignore 'node_modules/**/*' -r ts-node/register --recursive --exit tests/*.ts",
     "test-coverage": "c8 yarn test && c8 report -r html"
