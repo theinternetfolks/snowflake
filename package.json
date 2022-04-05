@@ -1,0 +1,42 @@
+{
+  "name": "@theinternetfolks/snowflake",
+  "version": "1.0.0",
+  "description": "Library to help you create a Snowflake Id or parse the same.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:map": "tsc -d --declarationDir ./dist --declarationMap --emitDeclarationOnly",
+    "test": "mocha --ignore 'node_modules/**/*' -r ts-node/register --recursive --exit tests/*.ts",
+    "test-coverage": "c8 yarn test && c8 report -r html"
+  },
+  "author": "Sameer Khan <sameer.khan@theinternetfolks.com>",
+  "organization": "The Internet Folks",
+  "repository": "https://github.com/theinternetfolks/snowflake",
+  "files": [
+    "dist",
+    "LICENSE",
+    "package.json",
+    "README.md"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.12",
+    "c8": "^7.10.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "snowflake",
+    "objectid",
+    "unique",
+    "identifier",
+    "twitter snowflake"
+  ]
+}
