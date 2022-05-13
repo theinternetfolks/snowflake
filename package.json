@@ -1,6 +1,6 @@
 {
   "name": "@theinternetfolks/snowflake",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Library to help you create a Snowflake Id or parse the same.",
   "main": "dist/index.js",
   "scripts": {
@@ -15,6 +15,7 @@
   "repository": "https://github.com/theinternetfolks/snowflake",
   "files": [
     "dist",
+    "src",
     "LICENSE",
     "package.json",
     "README.md"
