@@ -43,7 +43,7 @@ export class Snowflake {
     if (timestamp instanceof Date) timestamp = timestamp.valueOf();
     else timestamp = new Date(timestamp).valueOf();
     // tslint:disable:no-bitwise
-    let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(23);
+    let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
     result = result | (BigInt(shard_id) << BigInt(10));
     result = result | BigInt(salt % 1024);
     // tslint:enable:no-bitwise
@@ -60,15 +60,27 @@ export class Snowflake {
     const binary = Snowflake.binary(snowflake);
     return {
       timestamp: Number(
-        Snowflake.extractBits(snowflake, BigInt(23), BigInt(64)) +
+        Snowflake.extractBits(snowflake, BigInt(22), BigInt(64)) +
           BigInt(Snowflake.EPOCH)
       ),
       shard_id: Number(
-        Snowflake.extractBits(snowflake, BigInt(10), BigInt(13))
+        Snowflake.extractBits(snowflake, BigInt(10), BigInt(12))
       ),
       salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
       binary,
     };
+  }
+
+  static isValid(snowflake: string) {
+    if (!/^[\d]{19}$/.test(snowflake)) {
+      return false;
+    }
+    try {
+      Snowflake.parse(snowflake);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /**

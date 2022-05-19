@@ -31,6 +31,7 @@ export declare class Snowflake {
      * @returns {DeconstructedSnowflake|DeconstructedSnowflake[]}
      */
     static parse(snowflake: SnowflakeResolvable): DeconstructedSnowflake;
+    static isValid(snowflake: string): boolean;
     /**
      * Extract bits and their values from a snowflake.
      * @param {SnowflakeResolvable} snowflake - Snowflake to extract from

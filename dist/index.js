@@ -18,7 +18,7 @@ var Snowflake = /** @class */ (function () {
         else
             timestamp = new Date(timestamp).valueOf();
         // tslint:disable:no-bitwise
-        var result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(23);
+        var result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
         result = result | (BigInt(shard_id) << BigInt(10));
         result = result | BigInt(salt % 1024);
         // tslint:enable:no-bitwise
@@ -32,12 +32,24 @@ var Snowflake = /** @class */ (function () {
     Snowflake.parse = function (snowflake) {
         var binary = Snowflake.binary(snowflake);
         return {
-            timestamp: Number(Snowflake.extractBits(snowflake, BigInt(23), BigInt(64)) +
+            timestamp: Number(Snowflake.extractBits(snowflake, BigInt(22), BigInt(64)) +
                 BigInt(Snowflake.EPOCH)),
-            shard_id: Number(Snowflake.extractBits(snowflake, BigInt(10), BigInt(13))),
+            shard_id: Number(Snowflake.extractBits(snowflake, BigInt(10), BigInt(12))),
             salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
             binary: binary,
         };
+    };
+    Snowflake.isValid = function (snowflake) {
+        if (!/^[\d]{19}$/.test(snowflake)) {
+            return false;
+        }
+        try {
+            Snowflake.parse(snowflake);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
     };
     /**
      * Extract bits and their values from a snowflake.
