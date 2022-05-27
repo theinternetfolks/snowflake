@@ -21,7 +21,7 @@ export class Snowflake {
    */
   /* c8 ignore end */
 
-  static SHARD_ID: number = 1;
+  static SHARD_ID: number | null = null;
 
   /* c8 ignore start */
   /**
@@ -34,18 +34,21 @@ export class Snowflake {
   static generate({
     timestamp = Date.now(),
     shard_id = Snowflake.SHARD_ID,
-    salt = Number((Math.random() * 1e3).toFixed(0)),
+    sequence = Number((Math.random() * 1e4).toFixed(0)),
   }: {
     timestamp?: Date | number;
     shard_id?: number;
-    salt?: number;
+    sequence?: number;
   } = {}): string {
     if (timestamp instanceof Date) timestamp = timestamp.valueOf();
     else timestamp = new Date(timestamp).valueOf();
+
+    if (shard_id === null) shard_id = Number((Math.random() * 1e5).toFixed(0));
+
     // tslint:disable:no-bitwise
     let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
-    result = result | (BigInt(shard_id) << BigInt(10));
-    result = result | BigInt(salt % 1024);
+    result = result | (BigInt(shard_id % 1024) << BigInt(12));
+    result = result | BigInt(sequence % 4096);
     // tslint:enable:no-bitwise
     return result.toString();
   }
@@ -59,14 +62,9 @@ export class Snowflake {
   static parse(snowflake: SnowflakeResolvable): DeconstructedSnowflake {
     const binary = Snowflake.binary(snowflake);
     return {
-      timestamp: Number(
-        Snowflake.extractBits(snowflake, BigInt(22), BigInt(64)) +
-          BigInt(Snowflake.EPOCH)
-      ),
-      shard_id: Number(
-        Snowflake.extractBits(snowflake, BigInt(10), BigInt(12))
-      ),
-      salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
+      timestamp: Snowflake.extractBits(snowflake, 1, 41),
+      shard_id: Snowflake.extractBits(snowflake, 42, 10),
+      sequence: Snowflake.extractBits(snowflake, 52),
       binary,
     };
   }
@@ -93,14 +91,15 @@ export class Snowflake {
 
   static extractBits(
     snowflake: SnowflakeResolvable,
-    shift: number | bigint,
-    length: number | bigint
-  ): bigint {
-    const shiftN = BigInt(shift);
-    // tslint:disable:no-bitwise
-    const bitmask = ((BigInt(1) << BigInt(length)) - BigInt(1)) << shiftN;
-    return (BigInt(snowflake) & bitmask) >> shiftN;
-    // tslint:enable:no-bitwise
+    start: number,
+    length?: number
+  ): number {
+    return parseInt(
+      length
+        ? Snowflake.binary(snowflake).substring(start, start + length)
+        : Snowflake.binary(snowflake).substring(start),
+      2
+    );
   }
 
   /**
@@ -128,7 +127,7 @@ export class Snowflake {
  * @type {SnowflakeResolvable}
  */
 
-type SnowflakeResolvable = string | number | bigint;
+type SnowflakeResolvable = string;
 
 /**
  * Interface of a Snowflake after `Generator.deconstruct()`.
@@ -143,6 +142,6 @@ type SnowflakeResolvable = string | number | bigint;
 interface DeconstructedSnowflake {
   timestamp: number;
   shard_id: number;
-  salt: number;
+  sequence: number;
   binary: string;
 }

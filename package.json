@@ -1,6 +1,6 @@
 {
   "name": "@theinternetfolks/snowflake",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Library to help you create a Snowflake Id or parse the same.",
   "main": "dist/index.js",
   "scripts": {

@@ -3,28 +3,22 @@ import { Snowflake } from "../src/index";
 
 const tests = [
   {
-    timestamp: 1649161028424,
-    value: "6917082698162902015",
-    shard_id: 4,
-    salt: 1023,
-  },
-  {
-    timestamp: 1649161059081,
-    value: "6917082826748448499",
-    shard_id: 755,
-    salt: 755,
-  },
-  {
-    timestamp: 1649161081508,
-    value: "6917082920815127972",
-    shard_id: 1755,
-    salt: 420,
-  },
-  {
-    timestamp: 1649161118392,
-    value: "6917083075516040193",
+    timestamp: 1653653263221,
+    value: "6935924496540897281",
     shard_id: 1,
-    salt: 1,
+    sequence: 1,
+  },
+  {
+    timestamp: 1653653289600,
+    value: "6935924607185511855",
+    shard_id: 750,
+    sequence: 1455,
+  },
+  {
+    timestamp: 1653653311149,
+    value: "6935924697568571351",
+    shard_id: 750,
+    sequence: 4055,
   },
 ];
 
@@ -36,7 +30,7 @@ describe("index", () => {
           Snowflake.generate({
             timestamp: test.timestamp,
             shard_id: test.shard_id,
-            salt: test.salt,
+            sequence: test.sequence,
           }).toString()
         ).to.be.eq(test.value);
       }
@@ -48,6 +42,13 @@ describe("index", () => {
       }
       expect(generated.length).to.be.equal(new Set(generated).size);
     });
+    it("should generate a unique snowflake", () => {
+      const generated: string[] = [];
+      for (const test of [...Array(1e3)]) {
+        generated.push(Snowflake.generate());
+      }
+      expect(generated.length).to.be.equal(new Set(generated).size);
+    });
   });
 
   describe("deconstruct", () => {
@@ -55,6 +56,7 @@ describe("index", () => {
       for (const test of tests) {
         const parsed = Snowflake.parse(test.value);
         expect(parsed.timestamp).to.be.eq(test.timestamp);
+        expect(parsed.sequence).to.be.eq(test.sequence);
         expect(parsed.shard_id).to.be.eq(test.shard_id);
       }
     });

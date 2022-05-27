@@ -14,16 +14,16 @@ export declare class Snowflake {
      *
      * @type {number}
      */
-    static SHARD_ID: number;
+    static SHARD_ID: number | null;
     /**
      * Generates a single snowflake.
      * @param {Date|number} [timestamp = Date.now] - Timestamp to generate from
      * @returns {bigint}
      */
-    static generate({ timestamp, shard_id, salt, }?: {
+    static generate({ timestamp, shard_id, sequence, }?: {
         timestamp?: Date | number;
         shard_id?: number;
-        salt?: number;
+        sequence?: number;
     }): string;
     /**
      * Deconstruct a snowflake to its values using the `Generator.epoch`.
@@ -39,7 +39,7 @@ export declare class Snowflake {
      * @param {number|bigint} length - Number of bits to extract before stopping
      * @returns {bigint}
      */
-    static extractBits(snowflake: SnowflakeResolvable, shift: number | bigint, length: number | bigint): bigint;
+    static extractBits(snowflake: SnowflakeResolvable, start: number, length?: number): number;
     /**
      * Transform a snowflake into its 64Bit binary string.
      * @param {SnowflakeResolvable} snowflake - Snowflake to transform
@@ -55,7 +55,7 @@ export declare class Snowflake {
  * * bigint
  * @type {SnowflakeResolvable}
  */
-declare type SnowflakeResolvable = string | number | bigint;
+declare type SnowflakeResolvable = string;
 /**
  * Interface of a Snowflake after `Generator.deconstruct()`.
  * @property {bigint} snowflake - Snowflake deconstructed from
@@ -68,7 +68,7 @@ declare type SnowflakeResolvable = string | number | bigint;
 interface DeconstructedSnowflake {
     timestamp: number;
     shard_id: number;
-    salt: number;
+    sequence: number;
     binary: string;
 }
 export {};

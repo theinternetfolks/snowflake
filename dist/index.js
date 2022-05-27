@@ -12,15 +12,17 @@ var Snowflake = /** @class */ (function () {
      */
     /* c8 ignore end */
     Snowflake.generate = function (_a) {
-        var _b = _a === void 0 ? {} : _a, _c = _b.timestamp, timestamp = _c === void 0 ? Date.now() : _c, _d = _b.shard_id, shard_id = _d === void 0 ? Snowflake.SHARD_ID : _d, _e = _b.salt, salt = _e === void 0 ? Number((Math.random() * 1e3).toFixed(0)) : _e;
+        var _b = _a === void 0 ? {} : _a, _c = _b.timestamp, timestamp = _c === void 0 ? Date.now() : _c, _d = _b.shard_id, shard_id = _d === void 0 ? Snowflake.SHARD_ID : _d, _e = _b.sequence, sequence = _e === void 0 ? Number((Math.random() * 1e4).toFixed(0)) : _e;
         if (timestamp instanceof Date)
             timestamp = timestamp.valueOf();
         else
             timestamp = new Date(timestamp).valueOf();
+        if (shard_id === null)
+            shard_id = Number((Math.random() * 1e5).toFixed(0));
         // tslint:disable:no-bitwise
         var result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
-        result = result | (BigInt(shard_id) << BigInt(10));
-        result = result | BigInt(salt % 1024);
+        result = result | (BigInt(shard_id % 1024) << BigInt(12));
+        result = result | BigInt(sequence % 4096);
         // tslint:enable:no-bitwise
         return result.toString();
     };
@@ -32,10 +34,9 @@ var Snowflake = /** @class */ (function () {
     Snowflake.parse = function (snowflake) {
         var binary = Snowflake.binary(snowflake);
         return {
-            timestamp: Number(Snowflake.extractBits(snowflake, BigInt(22), BigInt(64)) +
-                BigInt(Snowflake.EPOCH)),
-            shard_id: Number(Snowflake.extractBits(snowflake, BigInt(10), BigInt(12))),
-            salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
+            timestamp: Snowflake.extractBits(snowflake, 1, 41),
+            shard_id: Snowflake.extractBits(snowflake, 42, 10),
+            sequence: Snowflake.extractBits(snowflake, 52),
             binary: binary,
         };
     };
@@ -58,12 +59,10 @@ var Snowflake = /** @class */ (function () {
      * @param {number|bigint} length - Number of bits to extract before stopping
      * @returns {bigint}
      */
-    Snowflake.extractBits = function (snowflake, shift, length) {
-        var shiftN = BigInt(shift);
-        // tslint:disable:no-bitwise
-        var bitmask = ((BigInt(1) << BigInt(length)) - BigInt(1)) << shiftN;
-        return (BigInt(snowflake) & bitmask) >> shiftN;
-        // tslint:enable:no-bitwise
+    Snowflake.extractBits = function (snowflake, start, length) {
+        return parseInt(length
+            ? Snowflake.binary(snowflake).substring(start, start + length)
+            : Snowflake.binary(snowflake).substring(start), 2);
     };
     /**
      * Transform a snowflake into its 64Bit binary string.
@@ -97,7 +96,7 @@ var Snowflake = /** @class */ (function () {
      * @type {number}
      */
     /* c8 ignore end */
-    Snowflake.SHARD_ID = 1;
+    Snowflake.SHARD_ID = null;
     return Snowflake;
 }());
 exports.Snowflake = Snowflake;
