@@ -23,14 +23,18 @@ const tests = [
 ];
 
 describe("index", () => {
+  beforeEach(() => {
+    Snowflake.SEQUENCE = 1;
+  });
+
   describe("generate", () => {
     it("should generate a snowflake", () => {
       for (const test of tests) {
+        Snowflake.SEQUENCE = test.sequence;
         expect(
           Snowflake.generate({
             timestamp: test.timestamp,
             shard_id: test.shard_id,
-            sequence: test.sequence,
           }).toString()
         ).to.be.eq(test.value);
       }
@@ -44,7 +48,7 @@ describe("index", () => {
     });
     it("should generate a unique snowflake", () => {
       const generated: string[] = [];
-      for (const test of [...Array(1e3)]) {
+      for (const test of [...Array(1e6)]) {
         generated.push(Snowflake.generate());
       }
       expect(generated.length).to.be.equal(new Set(generated).size);

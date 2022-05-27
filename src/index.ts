@@ -21,7 +21,19 @@ export class Snowflake {
    */
   /* c8 ignore end */
 
-  static SHARD_ID: number | null = null;
+  static SHARD_ID: number = 1;
+
+  /* c8 ignore start */
+  /**
+   * The sequence of the current running generator.
+   *
+   * Defaults to "1".
+   *
+   * @type {number}
+   */
+  /* c8 ignore end */
+
+  static SEQUENCE: number = 1;
 
   /* c8 ignore start */
   /**
@@ -34,21 +46,17 @@ export class Snowflake {
   static generate({
     timestamp = Date.now(),
     shard_id = Snowflake.SHARD_ID,
-    sequence = Number((Math.random() * 1e4).toFixed(0)),
   }: {
     timestamp?: Date | number;
     shard_id?: number;
-    sequence?: number;
   } = {}): string {
     if (timestamp instanceof Date) timestamp = timestamp.valueOf();
     else timestamp = new Date(timestamp).valueOf();
 
-    if (shard_id === null) shard_id = Number((Math.random() * 1e5).toFixed(0));
-
     // tslint:disable:no-bitwise
     let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) << BigInt(22);
     result = result | (BigInt(shard_id % 1024) << BigInt(12));
-    result = result | BigInt(sequence % 4096);
+    result = result | BigInt(Snowflake.SEQUENCE++ % 4096);
     // tslint:enable:no-bitwise
     return result.toString();
   }

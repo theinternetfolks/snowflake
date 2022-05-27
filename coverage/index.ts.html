@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">99.26% </span>
+                <span class="strong">99.35% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>135/136</span>
+                <span class='fraction'>154/155</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>15/15</span>
+                <span class='fraction'>18/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/5</span>
+                <span class='fraction'>5/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">99.26% </span>
+                <span class="strong">99.35% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>135/136</span>
+                <span class='fraction'>154/155</span>
             </div>
         
             
@@ -199,7 +199,45 @@
 <a name='L134'></a><a href='#L134'>134</a>
 <a name='L135'></a><a href='#L135'>135</a>
 <a name='L136'></a><a href='#L136'>136</a>
-<a name='L137'></a><a href='#L137'>137</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -362,6 +400,18 @@
 &nbsp;
   /* c8 ignore start */
   /**
+   * The sequence of the current running generator.
+   *
+   * Defaults to "1".
+   *
+   * @type {number}
+   */
+  /* c8 ignore end */
+&nbsp;
+  static SEQUENCE: number = 1;
+&nbsp;
+  /* c8 ignore start */
+  /**
    * Generates a single snowflake.
    * @param {Date|number} [timestamp = Date.now] - Timestamp to generate from
    * @returns {bigint}
@@ -371,18 +421,17 @@
   static generate({
     timestamp = Date.now(),
     shard_id = Snowflake.SHARD_ID,
-    salt = Number((Math.random() * 1e3).toFixed(0)),
   }: {
     timestamp?: Date | number;
     shard_id?: number;
-    salt?: number;
   } = {}): string {
     if (timestamp instanceof Date) timestamp = timestamp.valueOf();
     else timestamp = new Date(timestamp).valueOf();
+&nbsp;
     // tslint:disable:no-bitwise
-    let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) &lt;&lt; BigInt(23);
-    result = result | (BigInt(shard_id) &lt;&lt; BigInt(10));
-    result = result | BigInt(salt % 1024);
+    let result = (BigInt(timestamp) - BigInt(Snowflake.EPOCH)) &lt;&lt; BigInt(22);
+    result = result | (BigInt(shard_id % 1024) &lt;&lt; BigInt(12));
+    result = result | BigInt(Snowflake.SEQUENCE++ % 4096);
     // tslint:enable:no-bitwise
     return result.toString();
   }
@@ -396,16 +445,23 @@
   static parse(snowflake: SnowflakeResolvable): DeconstructedSnowflake {
     const binary = Snowflake.binary(snowflake);
     return {
-      timestamp: Number(
-        Snowflake.extractBits(snowflake, BigInt(23), BigInt(64)) +
-          BigInt(Snowflake.EPOCH)
-      ),
-      shard_id: Number(
-        Snowflake.extractBits(snowflake, BigInt(10), BigInt(13))
-      ),
-      salt: Number(Snowflake.extractBits(snowflake, BigInt(0), BigInt(10))),
+      timestamp: Snowflake.extractBits(snowflake, 1, 41),
+      shard_id: Snowflake.extractBits(snowflake, 42, 10),
+      sequence: Snowflake.extractBits(snowflake, 52),
       binary,
     };
+  }
+&nbsp;
+  static isValid(snowflake: string) {
+    if (!/^[\d]{19}$/.test(snowflake)) {
+      return false;
+    }
+    try {
+      Snowflake.parse(snowflake);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 &nbsp;
   /**
@@ -418,14 +474,15 @@
 &nbsp;
   static extractBits(
     snowflake: SnowflakeResolvable,
-    shift: number | bigint,
-    length: number | bigint
-  ): bigint {
-    const shiftN = BigInt(shift);
-    // tslint:disable:no-bitwise
-    const bitmask = ((BigInt(1) &lt;&lt; BigInt(length)) - BigInt(1)) &lt;&lt; shiftN;
-    return (BigInt(snowflake) &amp; bitmask) &gt;&gt; shiftN;
-    // tslint:enable:no-bitwise
+    start: number,
+    length?: number
+  ): number {
+    return parseInt(
+      length
+        ? Snowflake.binary(snowflake).substring(start, start + length)
+        : Snowflake.binary(snowflake).substring(start),
+      2
+    );
   }
 &nbsp;
   /**
@@ -453,7 +510,7 @@
  * @type {SnowflakeResolvable}
  */
 &nbsp;
-type SnowflakeResolvable = string | number | bigint;
+type SnowflakeResolvable = string;
 &nbsp;
 /**
  * Interface of a Snowflake after `Generator.deconstruct()`.
@@ -468,7 +525,7 @@ type SnowflakeResolvable = string | number | bigint;
 interface DeconstructedSnowflake {
   timestamp: number;
   shard_id: number;
-  salt: number;
+  sequence: number;
   binary: string;
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -477,10 +534,9 @@ interface DeconstructedSnowflake {
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
-                <a href="https://istanbul.js.org/" target="_blank" rel="noopener">istanbul</a>
-                at Tue Apr 05 2022 17:52:42 GMT+0530 (India Standard Time)
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at Fri May 27 2022 18:10:35 GMT+0530 (India Standard Time)
             </div>
-        </div>
         <script src="prettify.js"></script>
         <script>
             window.onload = function () {
